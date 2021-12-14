@@ -16,14 +16,15 @@ public class Part2Runner extends Challenge {
 	String template;
 	
 	Map<String, String> dict = new HashMap<>();
-	
+	Map<String, Long> pairs = new HashMap<>();
+	Map<String, Long> newPairs = new HashMap<>();
 	Map<String, Long> totals = new HashMap<>();
 	
 	String lowest = null;
 	Long lowestCount = null;
 	String highest = null;
 	Long highestCount = null;
-
+  
 	public Part2Runner(String filename) {
 		super(filename);
 		run();
@@ -39,20 +40,37 @@ public class Part2Runner extends Challenge {
 		runLogic();
 	}
 	
-	private void incrementPair(String pair, int i) {
-		if (i >= 40) {
-			return;
+	private void iteratePairs() {
+		try {
+			pairs.entrySet().forEach(e -> {
+				String newLetter = dict.get(e.getKey());
+				if (newLetter == null) {
+					String test = "test";
+					test.toCharArray();
+				};
+				if (totals.containsKey(newLetter)) {
+					totals.put(newLetter, totals.get(newLetter) + e.getValue());			
+				}  else {
+					totals.put(newLetter, e.getValue());
+				}
+				String[] letters = e.getKey().split("");
+				if (newPairs.containsKey(letters[0] + newLetter)) {
+					newPairs.put(letters[0] + newLetter, newPairs.get(letters[0] + newLetter) + e.getValue());			
+				}  else {
+					newPairs.put(letters[0] + newLetter, e.getValue());
+				}
+				if (newPairs.containsKey(newLetter + letters[1])) {
+					newPairs.put(newLetter + letters[1], newPairs.get(newLetter + letters[1]) + e.getValue());			
+				}  else {
+					newPairs.put(newLetter + letters[1], e.getValue());
+				}
+			});
+			pairs = newPairs;
+			newPairs = new HashMap<>();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		String newLetter = dict.get(pair);
-		if (totals.containsKey(newLetter)) {
-			totals.put(newLetter, totals.get(newLetter) + 1);			
-		}  else {
-			totals.put(newLetter, 1L);
-		}
-		String[] eles = pair.split("");
-		incrementPair(eles[0]+newLetter, i + 1);
-		incrementPair(newLetter + eles[1], i + 1);
-		
 	}
 	
 	private void runLogic() {
@@ -64,9 +82,20 @@ public class Part2Runner extends Challenge {
 				totals.put(ele, 1L);
 			}
 		}
+		
 		for (int i = 0; i < eles.length-1; i++) {
-			incrementPair(eles[i]+eles[i+1], 0);
+			String pair = eles[i]+eles[i+1];
+			if (pairs.containsKey(pair)) {
+				pairs.put(pair, pairs.get(pair)+1);
+			} else {
+				pairs.put(pair,  1L);
+			}
 		}
+		
+		for (int i = 0; i < 40; i++) {
+			iteratePairs();
+		}
+		
 		System.out.println("finished incrementing pairs");
 		totals.entrySet().stream().forEach( e -> {
 			if (lowestCount == null || e.getValue() < lowestCount) {
@@ -106,5 +135,4 @@ public class Part2Runner extends Challenge {
 		}
 	}
 	
-
 }
